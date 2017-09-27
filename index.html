@@ -35,6 +35,9 @@ var stars;
 var score = 0;
 var scoreText;
 
+var hitTimer;
+var hitProtection = false;
+
 function create() {
 
     //  We're going to be using physics, so enable the Arcade Physics system
@@ -185,9 +188,25 @@ function playerHit(player, enemy) {
 
     // Need to add death, explosion, etc.
     // DEBUG: This needs to have a timer to prevent multiple hits per second.
-    score -= 5;
+    if (hitProtection) {
+        // Do nothing
+    } else {
+        score -= 5;
+        scoreText.text = 'Score: ' + score;
+        hitProtection = true;
+        hitTimer = game.time.create(true);
+        // Remove hit protection after a delay
+        hitTimer.add(2000, removeHitProtection, '', this);
+        hitTimer.start();
+    }
 
 }
+
+function removeHitProtection() {
+    hitProtection = false;
+}
+
+
 
 </script>
 
