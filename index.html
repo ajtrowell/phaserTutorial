@@ -22,10 +22,12 @@ function preload() {
     game.load.image('ground', 'assets/platform.png');
     game.load.image('star', 'assets/star.png');
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+    game.load.spritesheet('baddie', 'assets/baddie.png', 32, 32);
 
 }
 
 var player;
+var enemy;
 var platforms;
 var cursors;
 
@@ -78,6 +80,17 @@ function create() {
     player.animations.add('left', [0, 1, 2, 3], 10, true);
     player.animations.add('right', [5, 6, 7, 8], 10, true);
 
+    // Create our enemy
+    enemy = game.add.sprite(game.world.width-100, 200, 'baddie');
+    game.physics.arcade.enable(enemy);
+    enemy.body.bounce.y = 0.2;
+    enemy.body.gravity.y = 300;
+    enemy.body.collideworldBounds = true;
+    // Two enemy animations
+    enemy.animations.add('left',  [0, 1], 10, true);
+    enemy.animations.add('right', [2, 3], 10, true);
+    
+
     //  Finally some stars to collect
     stars = game.add.group();
 
@@ -110,10 +123,16 @@ function update() {
     //  Collide the player and the stars with the platforms
     var hitPlatform = game.physics.arcade.collide(player, platforms);
     game.physics.arcade.collide(stars, platforms);
+    game.physics.arcade.collide(enemy, platforms);
 
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     game.physics.arcade.overlap(player, stars, collectStar, null, this);
 
+    //  Checks to see if the enemy overlaps with the player, and calls playerHit function
+    game.physics.arcade.overlap(player, enemy, playerHit, null, this);
+
+
+    // PLAYER CONTROLS
     //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
 
@@ -145,6 +164,10 @@ function update() {
         player.body.velocity.y = -350;
     }
 
+
+    // ENEMY BEHAVIOR
+    enemy.frame = 0;
+
 }
 
 function collectStar (player, star) {
@@ -155,6 +178,14 @@ function collectStar (player, star) {
     //  Add and update the score
     score += 10;
     scoreText.text = 'Score: ' + score;
+
+}
+
+function playerHit(player, enemy) {
+
+    // Need to add death, explosion, etc.
+    // DEBUG: This needs to have a timer to prevent multiple hits per second.
+    score -= 5;
 
 }
 
