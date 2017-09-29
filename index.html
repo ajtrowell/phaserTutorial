@@ -23,11 +23,16 @@ function preload() {
     game.load.image('star', 'assets/star.png');
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
     game.load.spritesheet('baddie', 'assets/baddie.png', 32, 32);
+    game.load.spritesheet('explosion', 'assets/Explosion03.png', 128, 128);
+
+    // Continue running game after focus is lost
+    game.stage.disableVisibilityChange = true;
 
 }
 
 var player;
 var enemy;
+var explosion;
 var platforms;
 var cursors;
 
@@ -78,6 +83,8 @@ function create() {
     player.body.bounce.y = 0.2;
     player.body.gravity.y = 300;
     player.body.collideWorldBounds = true;
+    player.anchor.x = 0.5;
+    player.anchor.y = 0.5;
 
     //  Our two animations, walking left and right.
     player.animations.add('left', [0, 1, 2, 3], 10, true);
@@ -89,10 +96,19 @@ function create() {
     enemy.body.bounce.y = 0.2;
     enemy.body.gravity.y = 300;
     enemy.body.collideworldBounds = true;
+    enemy.anchor.x = 0.5;
+    enemy.anchor.y = 0.5;
+
     // Two enemy animations
     enemy.animations.add('left',  [0, 1], 10, true);
     enemy.animations.add('right', [2, 3], 10, true);
     
+    // Explosion sprite
+    explosion = game.add.sprite(300, 300, 'explosion');
+    explosion.animations.add('boom', Phaser.Math.numberArray(0,15), 20, false);
+    explosion.frame = 15;
+    explosion.anchor.x = 0.5;
+    explosion.anchor.y = 0.5;
 
     //  Finally some stars to collect
     stars = game.add.group();
@@ -191,12 +207,19 @@ function playerHit(player, enemy) {
     if (hitProtection) {
         // Do nothing
     } else {
+        // Do Dammage!
+        // Reduce score
         score -= 5;
         scoreText.text = 'Score: ' + score;
+        // Play explosion at player position
+        explosion.x = player.x;
+        explosion.y = player.y;
+        explosion.animations.play('boom');
+        // Provide hit protection on a timer
         hitProtection = true;
         hitTimer = game.time.create(true);
         // Remove hit protection after a delay
-        hitTimer.add(2000, removeHitProtection, '', this);
+        hitTimer.add(800, removeHitProtection, '', this);
         hitTimer.start();
     }
 
